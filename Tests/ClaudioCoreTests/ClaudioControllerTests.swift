@@ -54,6 +54,18 @@ final class ClaudioControllerTests: XCTestCase {
         XCTAssertFalse(controller.prefs.enabled)
     }
 
+    func testReEnableAfterDisableReusesExistingSound() throws {
+        try controller.enableAll()
+        try controller.disableAll()
+        // Toggling back on must not throw and must restore both hooks.
+        XCTAssertNoThrow(try controller.enableAll())
+        XCTAssertTrue(try settings.isEnabled(event: .done))
+        XCTAssertTrue(try settings.isEnabled(event: .needsInput))
+        // The chosen sound name is preserved across the cycle (not corrupted to the file stem).
+        XCTAssertEqual(controller.prefs.selectedSoundName(for: .done), "Glass")
+        XCTAssertEqual(controller.prefs.selectedSoundName(for: .needsInput), "Submarine")
+    }
+
     func testSetSoundWhileEnabledUpdatesHookPath() throws {
         try controller.enableAll()
         let ping = URL(fileURLWithPath: "/System/Library/Sounds/Ping.aiff")

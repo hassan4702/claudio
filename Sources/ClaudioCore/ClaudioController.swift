@@ -26,10 +26,22 @@ public final class ClaudioController {
     }
 
     /// Turn Claudio on: ensure both events have an active sound copy and a hook.
+    /// If an active sound already exists (a prior pick or import), reuse it and
+    /// only rewrite the hook — re-copying the file onto itself would delete it,
+    /// and reusing the existing copy keeps imported custom sounds working.
     public func enableAll() throws {
         for event in ClaudioEvent.allCases {
-            let source = library.activeSoundURL(for: event) ?? defaultSource(for: event)
-            try setSound(source, for: event, writeHook: true)
+            let dest: URL
+            if let existing = library.activeSoundURL(for: event) {
+                dest = existing
+            } else {
+                let source = defaultSource(for: event)
+                dest = try library.setActiveSound(from: source, for: event)
+                prefs.setSelectedSoundName(
+                    source.deletingPathExtension().lastPathComponent, for: event)
+            }
+            try settings.enable(
+                event: event, command: HookBuilder.command(forSoundAt: dest.path))
         }
         prefs.enabled = true
     }
