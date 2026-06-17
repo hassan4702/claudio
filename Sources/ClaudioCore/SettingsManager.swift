@@ -18,7 +18,7 @@ public struct SettingsManager {
         let home = FileManager.default.homeDirectoryForCurrentUser
         return SettingsManager(
             settingsURL: home.appendingPathComponent(".claude/settings.json"),
-            backupURL: appSupport.appendingPathComponent("settings.backup.json"),
+            backupURL: appSupport.appendingPathComponent("settings.pre-claudio.json"),
             marker: marker
         )
     }
@@ -57,15 +57,17 @@ public struct SettingsManager {
         try data.write(to: settingsURL, options: .atomic)
     }
 
+    /// Writes a ONE-TIME pristine backup of the user's settings the first time
+    /// Claudio modifies the file, and never overwrites it — so the original
+    /// pre-Claudio config stays recoverable. No-op if there is no file yet, or
+    /// if a pristine backup already exists.
     private func backupCurrentFile() throws {
         guard FileManager.default.fileExists(atPath: settingsURL.path) else { return }
+        guard !FileManager.default.fileExists(atPath: backupURL.path) else { return }
         try FileManager.default.createDirectory(
             at: backupURL.deletingLastPathComponent(),
             withIntermediateDirectories: true
         )
-        if FileManager.default.fileExists(atPath: backupURL.path) {
-            try FileManager.default.removeItem(at: backupURL)
-        }
         try FileManager.default.copyItem(at: settingsURL, to: backupURL)
     }
 

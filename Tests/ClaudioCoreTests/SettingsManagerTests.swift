@@ -58,4 +58,15 @@ final class SettingsManagerTests: XCTestCase {
         try manager.enable(event: .done, command: cmd)
         XCTAssertTrue(FileManager.default.fileExists(atPath: backupURL.path))
     }
+
+    func testBackupCapturesPristineOriginalNotLaterWrites() throws {
+        try #"{"model":"opus"}"#.data(using: .utf8)!.write(to: settingsURL)
+        let cmd = HookBuilder.command(forSoundAt: marker + "/done.aiff")
+        try manager.enable(event: .done, command: cmd)   // write 1 -> backup = pristine original
+        try manager.disable(event: .done)                // write 2 -> must NOT overwrite backup
+        let backupData = try Data(contentsOf: backupURL)
+        let backupObj = try JSONSerialization.jsonObject(with: backupData) as? [String: Any]
+        XCTAssertEqual(backupObj?["model"] as? String, "opus")
+        XCTAssertNil(backupObj?["hooks"], "backup must be the pristine pre-Claudio file (no Claudio hooks)")
+    }
 }
