@@ -45,7 +45,7 @@ public struct SettingsManager {
 
     /// Serializes and writes `root` atomically, after backing up the current file.
     public func write(_ root: [String: Any]) throws {
-        try backupIfPossible()
+        try backupCurrentFile()
         let data = try JSONSerialization.data(
             withJSONObject: root,
             options: [.prettyPrinted, .sortedKeys]
@@ -57,7 +57,7 @@ public struct SettingsManager {
         try data.write(to: settingsURL, options: .atomic)
     }
 
-    private func backupIfPossible() throws {
+    private func backupCurrentFile() throws {
         guard FileManager.default.fileExists(atPath: settingsURL.path) else { return }
         try FileManager.default.createDirectory(
             at: backupURL.deletingLastPathComponent(),

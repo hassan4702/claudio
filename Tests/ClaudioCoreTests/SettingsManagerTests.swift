@@ -22,6 +22,12 @@ final class SettingsManagerTests: XCTestCase {
         try? FileManager.default.removeItem(at: dir)
     }
 
+    func testEmptyFileReturnsEmpty() throws {
+        try Data().write(to: settingsURL)
+        XCTAssertTrue(manager.settingsFileExists())
+        XCTAssertTrue(try manager.readRoot().isEmpty)
+    }
+
     func testReadMissingFileReturnsEmpty() throws {
         XCTAssertFalse(manager.settingsFileExists())
         XCTAssertTrue(try manager.readRoot().isEmpty)
