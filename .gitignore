@@ -1,0 +1,6 @@
+.build/
+*.xcodeproj
+Claudio.app/
+*.dmg
+.DS_Store
+claudio-design.md
