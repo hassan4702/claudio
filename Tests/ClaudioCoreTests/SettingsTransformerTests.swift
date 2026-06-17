@@ -59,4 +59,19 @@ final class SettingsTransformerTests: XCTestCase {
         XCTAssertEqual(groups?.count, 1)
         XCTAssertFalse(SettingsTransformer.isEnabled(root: disabled, event: .done, marker: marker))
     }
+
+    func testEnableDisableNeedsInputUsesNotificationKey() {
+        let cmd = "afplay \"\(marker)/needs-input.aiff\""
+        var root = parse("{}")
+        root = SettingsTransformer.enable(root: root, event: .needsInput, command: cmd, marker: marker)
+        XCTAssertTrue(SettingsTransformer.isEnabled(root: root, event: .needsInput, marker: marker))
+        // Independently assert the Notification key is used (not Stop).
+        let hooks = root["hooks"] as? [String: Any]
+        XCTAssertNotNil(hooks?["Notification"], "needsInput must write under the Notification key")
+        XCTAssertNil(hooks?["Stop"])
+        // Full cycle: disabling the only hook restores the empty shape.
+        root = SettingsTransformer.disable(root: root, event: .needsInput, marker: marker)
+        XCTAssertFalse(SettingsTransformer.isEnabled(root: root, event: .needsInput, marker: marker))
+        XCTAssertNil(root["hooks"], "disabling the only hook should remove the hooks key")
+    }
 }
