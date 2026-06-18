@@ -69,4 +69,24 @@ final class SettingsManagerTests: XCTestCase {
         XCTAssertEqual(backupObj?["model"] as? String, "opus")
         XCTAssertNil(backupObj?["hooks"], "backup must be the pristine pre-Claudio file (no Claudio hooks)")
     }
+
+    func testRestorePristineBackupRevertsClaudioChanges() throws {
+        try #"{"model":"opus"}"#.data(using: .utf8)!.write(to: settingsURL)
+        let cmd = HookBuilder.command(forSoundAt: marker + "/done.aiff")
+        try manager.enable(event: .done, command: cmd)   // writes hooks + creates pristine backup
+        XCTAssertTrue(manager.hasBackup())
+        XCTAssertTrue(try manager.isEnabled(event: .done))
+
+        XCTAssertTrue(try manager.restorePristineBackup())
+        // Back to the pristine original: no hooks, original key intact.
+        XCTAssertFalse(try manager.isEnabled(event: .done))
+        XCTAssertEqual(try manager.readRoot()["model"] as? String, "opus")
+        XCTAssertNil(try manager.readRoot()["hooks"])
+    }
+
+    func testRestoreReturnsFalseWhenNoBackup() throws {
+        try #"{"model":"opus"}"#.data(using: .utf8)!.write(to: settingsURL)
+        XCTAssertFalse(manager.hasBackup())
+        XCTAssertFalse(try manager.restorePristineBackup())
+    }
 }

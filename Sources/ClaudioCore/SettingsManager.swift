@@ -86,4 +86,21 @@ public struct SettingsManager {
     public func isEnabled(event: ClaudioEvent) throws -> Bool {
         SettingsTransformer.isEnabled(root: try readRoot(), event: event, marker: marker)
     }
+
+    /// True if a pristine pre-Claudio backup exists to restore from.
+    public func hasBackup() -> Bool {
+        FileManager.default.fileExists(atPath: backupURL.path)
+    }
+
+    /// Restores the user's settings file from the one-time pristine backup,
+    /// reverting all of Claudio's changes. Returns false if there is no backup.
+    @discardableResult
+    public func restorePristineBackup() throws -> Bool {
+        guard FileManager.default.fileExists(atPath: backupURL.path) else { return false }
+        let data = try Data(contentsOf: backupURL)
+        try FileManager.default.createDirectory(
+            at: settingsURL.deletingLastPathComponent(), withIntermediateDirectories: true)
+        try data.write(to: settingsURL, options: .atomic)
+        return true
+    }
 }

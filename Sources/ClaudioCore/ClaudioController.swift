@@ -15,6 +15,16 @@ public final class ClaudioController {
     /// Whether Claude Code's settings file was found.
     public var claudeCodeInstalled: Bool { settings.settingsFileExists() }
 
+    /// Whether a pristine pre-Claudio backup exists to restore.
+    public var hasBackup: Bool { settings.hasBackup() }
+
+    /// Restore the user's original pre-Claudio settings, removing Claudio's hooks.
+    public func restoreBackup() throws {
+        if try settings.restorePristineBackup() {
+            prefs.enabled = false
+        }
+    }
+
     /// A sensible default source sound for an event.
     public func defaultSource(for event: ClaudioEvent) -> URL {
         let name: String

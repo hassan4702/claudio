@@ -76,4 +76,13 @@ final class ClaudioControllerTests: XCTestCase {
         XCTAssertTrue((hook?["command"] as? String)?.contains("done.aiff") == true)
         XCTAssertEqual(controller.prefs.selectedSoundName(for: .done), "Ping")
     }
+
+    func testRestoreBackupRevertsAndDisables() throws {
+        try controller.enableAll()
+        XCTAssertTrue(controller.hasBackup)
+        try controller.restoreBackup()
+        XCTAssertFalse(try settings.isEnabled(event: .done))
+        XCTAssertFalse(try settings.isEnabled(event: .needsInput))
+        XCTAssertFalse(controller.prefs.enabled)
+    }
 }
