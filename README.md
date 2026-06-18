@@ -6,8 +6,17 @@ needs your input. It works by safely adding two hooks to your
 even when Claudio isn't running.
 
 ## Install
-Download `Claudio.dmg` from Releases, drag Claudio to Applications, open it,
-and click **Enable Claude sounds**.
+
+**Quickest — one command** (downloads, installs to Applications, launches):
+
+    curl -fsSL https://raw.githubusercontent.com/hassan4702/claudio/main/install.sh | bash
+
+**Or download manually:** grab `Claudio.dmg` from the [latest release](https://github.com/hassan4702/claudio/releases/latest),
+open it, and drag **Claudio** onto **Applications**. The first launch, right-click
+the app → **Open** once (Claudio isn't notarized yet, so macOS asks for confirmation
+that one time).
+
+Then click the 🔔 in your menu bar and hit **Enable Claude sounds**.
 
 ## Build from source
 Requires macOS 13+ and a Swift toolchain.

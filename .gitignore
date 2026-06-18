@@ -2,5 +2,7 @@
 *.xcodeproj
 Claudio.app/
 *.dmg
+Claudio.zip
+dmg-staging/
 .DS_Store
 claudio-design.md
