@@ -9,6 +9,7 @@ final class AppModel: ObservableObject {
     @Published var systemSounds: [Sound] = []
     @Published var selected: [ClaudioEvent: String] = [:]
     @Published var lastError: String?
+    @Published var hasBackup = false
 
     private let controller: ClaudioController
 
@@ -28,6 +29,7 @@ final class AppModel: ObservableObject {
         claudeInstalled = controller.claudeCodeInstalled
         systemSounds = controller.library.systemSounds()
         enabled = controller.prefs.enabled
+        hasBackup = controller.hasBackup
         for event in ClaudioEvent.allCases {
             selected[event] = controller.prefs.selectedSoundName(for: event)
         }
@@ -36,6 +38,7 @@ final class AppModel: ObservableObject {
     func toggle(_ on: Bool) {
         do {
             if on { try controller.enableAll() } else { try controller.disableAll() }
+            lastError = nil
             refresh()
         } catch { lastError = error.localizedDescription }
     }
@@ -43,6 +46,7 @@ final class AppModel: ObservableObject {
     func pick(_ sound: Sound, for event: ClaudioEvent) {
         do {
             try controller.setSound(sound.url, for: event, writeHook: enabled)
+            lastError = nil
             refresh()
         } catch { lastError = error.localizedDescription }
     }
@@ -50,6 +54,15 @@ final class AppModel: ObservableObject {
     func importSound(_ url: URL, for event: ClaudioEvent) {
         do {
             try controller.setSound(url, for: event, writeHook: enabled)
+            lastError = nil
+            refresh()
+        } catch { lastError = error.localizedDescription }
+    }
+
+    func restore() {
+        do {
+            try controller.restoreBackup()
+            lastError = nil
             refresh()
         } catch { lastError = error.localizedDescription }
     }

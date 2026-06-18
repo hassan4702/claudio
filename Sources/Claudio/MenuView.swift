@@ -22,8 +22,19 @@ struct MenuView: View {
                 ForEach(ClaudioEvent.allCases, id: \.self) { event in
                     EventRow(model: model, event: event)
                 }
+                if model.hasBackup {
+                    Divider()
+                    Button("Restore original settings") { model.restore() }
+                        .font(.caption)
+                }
             }
 
+            if let error = model.lastError {
+                Text(error)
+                    .font(.caption)
+                    .foregroundStyle(.red)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
             Divider()
             Button("Quit Claudio") { NSApplication.shared.terminate(nil) }
         }
